@@ -8,16 +8,21 @@
 #include "MicroBit.h"
 
 MicroBit uBit;
+MicroBitImage LBlock("255,0\n255,0\n255,255\n"); //L shaped block
+MicroBitImage SqrBlock("255,255\n255,255\n"); // Square shaped block
+MicroBitImage StrBlock("255,255,255,0\n"); // straight shaped block
+MicroBitImage Stage("0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n");
+
 
 void onButtonA(MicroBitEvent e)
 {
-    uBit.display.print("A");
+    Stage.shiftLeft(1);
     //move left
 }
 
 void onButtonB(MicroBitEvent e)
 {
-    uBit.display.print("B");
+    Stage.shiftRight(1);
     //move right
 }
 
@@ -30,10 +35,6 @@ int main()
     //add gyro to tell user to hold micro bit right way up
     //shaking game increase brightness?
     // Insert your code here
-    MicroBitImage LBlock("255,0\n255,0\n255,255\n"); //L shaped block
-    //MicroBitImage SqrBlock("255,255\n255,255\n"); // Square shaped block
-    MicroBitImage StrBlock("255,255,255,0\n"); // straight shaped block
-    MicroBitImage Stage("0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n");
          //paste(img,left most x cords, (highest y cord)
 
     /*
@@ -47,7 +48,7 @@ int main()
       Stage.paste(StrBlock,1,0);
     for(int i = 0; i <=4; i++){
         uBit.display.print(Stage);
-        uBit.sleep(500);
+        uBit.sleep(750);
         Stage.shiftDown(1);
       }
 
