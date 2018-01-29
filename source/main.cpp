@@ -51,7 +51,7 @@ bool checkBottomLine(int X, int Y){
     counter +=  PlayerSpace.getPixelValue(j,4);
   }
   if(counter >= 1275){
-    moveBlock(X, Y+1);
+    //moveBlock(X, Y+1);
     PlayerSpace.shiftDown(1); //remove bottom row if full
     return true;
   }
@@ -99,9 +99,12 @@ for(int Y = 0; Y <= 4; Y++){
       MoveRight = false;
     }
     else{
-      moveBlock(X,Y); //move down
       if(checkBottomLine(X, Y) == true){
-        Y++;
+        X,Y =0;
+        break;
+      }
+      else{
+          moveBlock(X,Y); //move downs
       }
     }
     }
