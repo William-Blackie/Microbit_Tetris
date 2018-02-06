@@ -85,14 +85,15 @@ void rotateBlock(int X, int Y){
 
         bLeft = PlayerSpace.getPixelValue(X, Y); // Find block placement
         bRight = PlayerSpace.getPixelValue(X+1, Y);
-        tLeft = PlayerSpace.getPixelValue(X, Y+1);
-        tRight = PlayerSpace.getPixelValue(X+1,Y+1);
+        tLeft = PlayerSpace.getPixelValue(X, Y-1);
+        tRight = PlayerSpace.getPixelValue(X+1,Y-1);
 
-        PlayerSpace.setPixelValue(X, Y, pixelIntensity(tRight));
-        PlayerSpace.setPixelValue(X+1, Y, pixelIntensity(bLeft));
-        PlayerSpace.setPixelValue(X, Y+1, pixelIntensity(bRight));
-        PlayerSpace.setPixelValue(X+1, Y+1, pixelIntensity(tLeft));
+        PlayerSpace.setPixelValue(X, Y, pixelIntensity(bRight));
+        PlayerSpace.setPixelValue(X+1, Y, pixelIntensity(tRight));
+        PlayerSpace.setPixelValue(X, Y-1, pixelIntensity(bLeft));
+        PlayerSpace.setPixelValue(X+1, Y-1, pixelIntensity(tLeft));
 
+        uBit.display.print(PlayerSpace);
         Y = tempY;
         X = tempX;
         canRotate = false;
