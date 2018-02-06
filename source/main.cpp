@@ -69,38 +69,35 @@ bool moveBlock(int X, int Y){
         }
 }
 
+int pixelIntensity(bool pixel){
+  if(pixel){
+    return 255; // Max pixel intensity
+  }
+  else{
+    return 0; // Min pixel intensity
+  }
+}
 
 void rotateBlock(int X, int Y){
         int tempX = X;
         int tempY = Y;
         bool bLeft, bRight, tLeft, tRight = false;
 
-        if((PlayerSpace.getPixelValue(X, Y)) > 0) {
-                PlayerSpace.setPixelValue(X, Y+1, 255);
-                PlayerSpace.setPixelValue(X, Y, 0);
-                tempY = Y+1;
-        }
-        if((PlayerSpace.getPixelValue(X, Y+1)) > 0) {
-                PlayerSpace.setPixelValue(X+1, Y+1, 255);
-                PlayerSpace.setPixelValue(X, Y+1, 0);
+        bLeft = PlayerSpace.getPixelValue(X, Y); // Find block placement
+        bRight = PlayerSpace.getPixelValue(X+1, Y);
+        tLeft = PlayerSpace.getPixelValue(X, Y+1);
+        tRight = PlayerSpace.getPixelValue(X+1,Y+1);
 
-                tempY = Y + 1;
-                tempX = X + 1;
-        }
-        if((PlayerSpace.getPixelValue(X+1, Y+1)) > 0) {
-                PlayerSpace.setPixelValue(X+1, Y, 255);
-                PlayerSpace.setPixelValue(X+1, Y+1, 0);
-                tempX = +1;
-        }
-        if((PlayerSpace.getPixelValue(X+1, Y)) > 0) {
-                PlayerSpace.setPixelValue(X, Y, 255);
-                PlayerSpace.setPixelValue(X+1, Y, 0);
-        }
+        PlayerSpace.setPixelValue(X, Y, pixelIntensity(tRight));
+        PlayerSpace.setPixelValue(X+1, Y, pixelIntensity(bLeft));
+        PlayerSpace.setPixelValue(X, Y+1, pixelIntensity(bRight));
+        PlayerSpace.setPixelValue(X+1, Y+1, pixelIntensity(tLeft));
 
         Y = tempY;
         X = tempX;
         canRotate = false;
 }
+
 
 bool checkBottomLine(){
         int counter = 0;
