@@ -11,8 +11,8 @@ MicroBitImage Stage("0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0,
 MicroBitImage PlayerSpace(Stage);
 bool MoveLeft, MoveRight, canMove, canRotate = false;
 int X, Y = 0;
-int oldX = 1;
-int oldY = 0;
+int newX, oldX = 1;
+int newY, oldY = 0;
 
 
 void onButtonA(MicroBitEvent e)
@@ -34,68 +34,78 @@ void onAccellerometer(MicroBitEvent e){
         }
 }
 
-bool moveBlock(int X, int Y){
-        if(Y >4) { // Prevent blocks going offscreen
-                Y = 4;
-        }
-
-        if(Y == 0) { // Stop old blocks getting overwritten
-                oldX = X - 1;
-                oldY = Y - 1;
-        }
-
-        if(X > 4) {// Prevent blocks going offscreen
-                X = 4;
-        }
-        else if(X < 0) {
-                X = 0;
-        }
-
-        if((PlayerSpace.getPixelValue(X, Y) > 1) || (PlayerSpace.getPixelValue(X+1, Y) > 1) || (Y > 4)) {
-                return false;
-                oldX = 1;
-                oldY = 0;
+int pixelIntensity(bool pixel){
+        if(pixel) {
+                return 255; // Max pixel intensity
         }
         else{
-                PlayerSpace.setPixelValue(X, Y, 255);//set new pixel 2 BLOCK
-                PlayerSpace.setPixelValue(oldX, oldY, 0); //whipe old pixel
+                return 0; // Min pixel intensity
+        }
+}
 
-                PlayerSpace.setPixelValue(X+1, Y, 255);
-                PlayerSpace.setPixelValue(oldX+1, oldY, 0);
+bool moveBlock(int X, int Y, int newX, int newY){
+        bool bLeft, bRight, tLeft, tRight = false;
+        if(newY >4) { // Prevent blocks going offscreen
+                newY = 4;
+        }
 
-                oldX = X;
-                oldY = Y;
+        if(newX > 4) {// Prevent blocks going offscreen
+                newX = 4;
+        }
+        else if(newX < 0) {
+                newX = 0;
+
+        }
+
+        if((PlayerSpace.getPixelValue(newX, newY) > 1) || (PlayerSpace.getPixelValue(newX+1, newY) > 1) || (newY > 4)) {
+                //newX = 1;
+                //  newY = 0;
+                return false;
+        }
+        else{
+                bLeft = (PlayerSpace.getPixelValue(X, Y) > 1); // Find block placement
+                bRight = (PlayerSpace.getPixelValue(X+1, Y) > 1);
+                tLeft = (PlayerSpace.getPixelValue(X, Y-1) > 1);
+                tRight = (PlayerSpace.getPixelValue(X+1,Y-1) > 1);
+
+                if(Y == -1 && !(bLeft && bRight && tLeft && tRight)) { // Create first block
+                        bLeft = true;
+                        bRight = true;
+                        tRight = true;
+                        tLeft = true;
+                }
+
+                PlayerSpace.setPixelValue(newX, newY, pixelIntensity(bLeft)); // Move all the coloured pixel
+                PlayerSpace.setPixelValue(newX+1, newY, pixelIntensity(bRight));
+                PlayerSpace.setPixelValue(newX, newY-1, pixelIntensity(tLeft));
+                PlayerSpace.setPixelValue(newX+1, newY-1, pixelIntensity(tRight));
+
+                PlayerSpace.setPixelValue(newX+2, newY-1, 0); // Remove old pixels
+                PlayerSpace.setPixelValue(newX+2, newY-2, 0);
+                PlayerSpace.setPixelValue(newX-1, newY-1, 0);
+                PlayerSpace.setPixelValue(newX-1, newY-2, 0);
+
+
+                X = newX;
+                Y = newY;
+
                 return true;
         }
 }
 
-int pixelIntensity(bool pixel){
-  if(pixel){
-    return 255; // Max pixel intensity
-  }
-  else{
-    return 0; // Min pixel intensity
-  }
-}
 
 void rotateBlock(int X, int Y){
-        int tempX = X;
-        int tempY = Y;
         bool bLeft, bRight, tLeft, tRight = false;
 
-        bLeft = PlayerSpace.getPixelValue(X, Y); // Find block placement
-        bRight = PlayerSpace.getPixelValue(X+1, Y);
-        tLeft = PlayerSpace.getPixelValue(X, Y-1);
-        tRight = PlayerSpace.getPixelValue(X+1,Y-1);
+        bLeft = (PlayerSpace.getPixelValue(X, Y) > 1); // Find pixel placement
+        bRight = (PlayerSpace.getPixelValue(X+1, Y) > 1);
+        tLeft = (PlayerSpace.getPixelValue(X, Y-1) > 1);
+        tRight = (PlayerSpace.getPixelValue(X+1,Y-1) > 1);
 
-        PlayerSpace.setPixelValue(X, Y, pixelIntensity(bRight));
+        PlayerSpace.setPixelValue(X, Y, pixelIntensity(bRight)); // Rotate pixels
         PlayerSpace.setPixelValue(X+1, Y, pixelIntensity(tRight));
         PlayerSpace.setPixelValue(X, Y-1, pixelIntensity(bLeft));
         PlayerSpace.setPixelValue(X+1, Y-1, pixelIntensity(tLeft));
-
-        uBit.display.print(PlayerSpace);
-        Y = tempY;
-        X = tempX;
         canRotate = false;
 }
 
@@ -155,34 +165,37 @@ int main()
 
         bool canMove = true; //can player still place a block
         while(canMove) {
-                int X = 1;
-                for(int Y = 0; Y <= 4; Y++) {
+                newX = 1;
+                X = 1;
+                Y = -1;
+                for(newY = 0; newY <= 4; newY++) {
                         uBit.display.print(PlayerSpace);
                         uBit.sleep(1000);
                         if(canRotate) {
-                                rotateBlock(X,Y);
+                                rotateBlock(newX,newY);
                                 MoveLeft = false;
                                 MoveRight = false;
+                                newY--;
                         }
                         else if(MoveLeft == true) {
-                                X--;
+                                newX--;
                                 MoveLeft = false;
                         }
                         else if(MoveRight == true) {
-                                X++;
+                                newX++;
                                 MoveRight = false;
                         }
                         /*else if(accelerometer.getGesture() == 11) { //SHAKE
                                 for(int i = 0; i < 4; i++) {
                                         PlayerSpace.setPixelValue(0, i, 255); //make colour bottom row to be cleaned up
                                 }
-                        }*/
+                           }*/
                         if(checkBottomLine()) { // places a new block
-                                X = 1; //reset xy
-                                Y = 0;
+                                newX = 1; //reset xy
+                                newY = 0;
                         }
                         else{
-                                if((moveBlock(X, Y)) == false) {
+                                if((moveBlock(X, Y, newX, newY)) == false) {
                                         canMove = checkEndGame();
                                         if(!(canMove)) { // Stop trying to place
                                                 break;
