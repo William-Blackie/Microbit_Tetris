@@ -7,12 +7,13 @@
 #include "MicroBit.h"
 
 MicroBit uBit;
-MicroBitImage Stage("0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n ");
-MicroBitImage PlayerSpace(Stage);
-bool MoveLeft, MoveRight, canMove, canRotate = false;
-int X, Y = 0;
-int newX, oldX = 1;
-int newY, oldY = 0;
+
+MicroBitImage stage("0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n "); // Representation of the players stage
+MicroBitImage playerSpace(stage);
+bool MoveLeft, MoveRight, canMove, canRotate = false; // Flags used in movement controll
+int X, Y = 0; // Coordinates used for block movement
+int newX = 1;
+int newY = 0;
 
 
 void onButtonA(MicroBitEvent e)
@@ -35,7 +36,7 @@ void onAccellerometer(MicroBitEvent e){
 }
 
 int pixelIntensity(bool pixel){
-        if(pixel) {
+        if(pixel == true) {
                 return 255; // Max pixel intensity
         }
         else{
@@ -43,7 +44,7 @@ int pixelIntensity(bool pixel){
         }
 }
 
-bool moveBlock(int X, int Y, int newX, int newY){
+bool moveBlock(int X, int Y, int newX, int newY, int blockCounter){
         bool bLeft, bRight, tLeft, tRight = false;
         if(newY >4) { // Prevent blocks going offscreen
                 newY = 4;
@@ -57,33 +58,46 @@ bool moveBlock(int X, int Y, int newX, int newY){
 
         }
 
-        if((PlayerSpace.getPixelValue(newX, newY) > 1) || (PlayerSpace.getPixelValue(newX+1, newY) > 1) || (newY > 4)) {
-                //newX = 1;
-                //  newY = 0;
+        if((playerSpace.getPixelValue(newX, newY) > 1) || (playerSpace.getPixelValue(newX+1, newY) > 1) || (newY > 4)) {
                 return false;
         }
         else{
-                bLeft = (PlayerSpace.getPixelValue(X, Y) > 1); // Find block placement
-                bRight = (PlayerSpace.getPixelValue(X+1, Y) > 1);
-                tLeft = (PlayerSpace.getPixelValue(X, Y-1) > 1);
-                tRight = (PlayerSpace.getPixelValue(X+1,Y-1) > 1);
+                bLeft = (playerSpace.getPixelValue(X, Y) > 1); // Find block placement
+                bRight = (playerSpace.getPixelValue(X+1, Y) > 1);
+                tLeft = (playerSpace.getPixelValue(X, Y-1) > 1);
+                tRight = (playerSpace.getPixelValue(X+1,Y-1) > 1);
 
-                if(Y == -1 && !(bLeft && bRight && tLeft && tRight)) { // Create first block
-                        bLeft = true;
-                        bRight = true;
-                        tRight = true;
-                        tLeft = true;
+                if(Y == -1) { // Create first block
+                        if(blockCounter == 0) {
+                                bLeft = true;
+                                bRight = true;
+
+                        }
+                        else if(blockCounter == 1) {
+                                bLeft = true;
+                                bRight = true;
+                                tRight = true;
+                        }
+                        else{
+                                bLeft = true;
+                                bRight = true;
+                                tRight = true;
+                                tLeft = true;
+                                blockCounter = -1;
+                        }
                 }
 
-                PlayerSpace.setPixelValue(newX, newY, pixelIntensity(bLeft)); // Move all the coloured pixel
-                PlayerSpace.setPixelValue(newX+1, newY, pixelIntensity(bRight));
-                PlayerSpace.setPixelValue(newX, newY-1, pixelIntensity(tLeft));
-                PlayerSpace.setPixelValue(newX+1, newY-1, pixelIntensity(tRight));
+                playerSpace.setPixelValue(newX, newY, pixelIntensity(bLeft)); // Move all the coloured pixel
+                playerSpace.setPixelValue(newX+1, newY, pixelIntensity(bRight));
+                playerSpace.setPixelValue(newX, newY-1, pixelIntensity(tLeft));
+                playerSpace.setPixelValue(newX+1, newY-1, pixelIntensity(tRight));
 
-                PlayerSpace.setPixelValue(newX+2, newY-1, 0); // Remove old pixels
-                PlayerSpace.setPixelValue(newX+2, newY-2, 0);
-                PlayerSpace.setPixelValue(newX-1, newY-1, 0);
-                PlayerSpace.setPixelValue(newX-1, newY-2, 0);
+                playerSpace.setPixelValue(newX+2, newY-1, 0); // Remove old pixels
+                playerSpace.setPixelValue(newX+2, newY-2, 0);
+                playerSpace.setPixelValue(newX-1, newY-1, 0);
+                playerSpace.setPixelValue(newX-1, newY-2, 0);
+                playerSpace.setPixelValue(newX, newY-2, 0);
+                playerSpace.setPixelValue(newX+1, newY-2, 0);
 
 
                 X = newX;
@@ -97,15 +111,17 @@ bool moveBlock(int X, int Y, int newX, int newY){
 void rotateBlock(int X, int Y){
         bool bLeft, bRight, tLeft, tRight = false;
 
-        bLeft = (PlayerSpace.getPixelValue(X, Y) > 1); // Find pixel placement
-        bRight = (PlayerSpace.getPixelValue(X+1, Y) > 1);
-        tLeft = (PlayerSpace.getPixelValue(X, Y-1) > 1);
-        tRight = (PlayerSpace.getPixelValue(X+1,Y-1) > 1);
+        bLeft = (playerSpace.getPixelValue(X, Y) > 1); // Find pixel placement
+        bRight = (playerSpace.getPixelValue(X+1, Y) > 1);
+        tLeft = (playerSpace.getPixelValue(X, Y-1) > 1);
+        tRight = (playerSpace.getPixelValue(X+1,Y-1) > 1);
 
-        PlayerSpace.setPixelValue(X, Y, pixelIntensity(bRight)); // Rotate pixels
-        PlayerSpace.setPixelValue(X+1, Y, pixelIntensity(tRight));
-        PlayerSpace.setPixelValue(X, Y-1, pixelIntensity(bLeft));
-        PlayerSpace.setPixelValue(X+1, Y-1, pixelIntensity(tLeft));
+        playerSpace.setPixelValue(X, Y, pixelIntensity(bRight)); // Rotate pixels clockwise
+        playerSpace.setPixelValue(X+1, Y, pixelIntensity(tRight));
+        playerSpace.setPixelValue(X, Y-1, pixelIntensity(bLeft));
+        playerSpace.setPixelValue(X+1, Y-1, pixelIntensity(tLeft));
+
+        uBit.display.print(playerSpace);
         canRotate = false;
 }
 
@@ -113,12 +129,11 @@ void rotateBlock(int X, int Y){
 bool checkBottomLine(){
         int counter = 0;
 
-        for (int j =0; j <= 4; j++) {
-                counter +=  PlayerSpace.getPixelValue(j,4);
+        for (int j =0; j <= 4; j++) { // Check entire bottom row for pixels
+                counter +=  playerSpace.getPixelValue(j,4);
         }
         if(counter >= 1275) {
-                //moveBlock(X, Y+1);
-                PlayerSpace.shiftDown(1); //remove bottom row if full
+                playerSpace.shiftDown(1); //remove bottom row if full
                 return true;
         }
         else{
@@ -130,7 +145,7 @@ bool checkEndGame(){
         int counter = 0;
 
         for (int k = 0; k<= 4; k++) {
-                counter +=  PlayerSpace.getPixelValue(k,0);//top row
+                counter +=  playerSpace.getPixelValue(k,0);// Check entire top row for pixels
         }
         if (counter >= 1) {
                 uBit.display.print("game over");
@@ -145,31 +160,27 @@ int main()
 {
         // Initialise the micro:bit runtime.
         uBit.init();
-        uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_EVT_ANY, onButtonA);
-        uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonB);
-        uBit.messageBus.listen(MICROBIT_ID_GESTURE, MICROBIT_ACCELEROMETER_EVT_SHAKE, onAccellerometer);
-        //uBit.messageBus.listen(MICROBIT_ID_ACCELEROMETER, MICROBIT_EVT_ANY, onAccellerometer);
 
-        //add gyro to tell user to hold micro bit right way up
-        //shaking game to clear ground blocks
-        // Insert your code here
-        /*
-            0 1 2 3 4 X
-           0   x x x x x
-           1   x x x x x
-           2   x x x x x
-           3   x x x x x
-           4   x x x x x
-           Y
-         */
+        bool canMove = true; // Used to
+        int blockCounter = -1; // Used to select blocks
+        uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_EVT_ANY, onButtonA); // Listener for button A
+        uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_CLICK, onButtonB); // Listener for button B
+        uBit.messageBus.listen(MICROBIT_ID_GESTURE, MICROBIT_ACCELEROMETER_EVT_SHAKE, onAccellerometer); // Listener for the acelerometer Shake gesture
 
-        bool canMove = true; //can player still place a block
+        uBit.display.scroll("TETRIS");
+
         while(canMove) {
                 newX = 1;
                 X = 1;
                 Y = -1;
+                if(blockCounter <= 2) {
+                        blockCounter++; // Changes block to be placed every time
+                }
+                else{
+                        blockCounter = -1;
+                }
                 for(newY = 0; newY <= 4; newY++) {
-                        uBit.display.print(PlayerSpace);
+                        uBit.display.print(playerSpace);
                         uBit.sleep(1000);
                         if(canRotate) {
                                 rotateBlock(newX,newY);
@@ -185,30 +196,22 @@ int main()
                                 newX++;
                                 MoveRight = false;
                         }
-                        /*else if(accelerometer.getGesture() == 11) { //SHAKE
-                                for(int i = 0; i < 4; i++) {
-                                        PlayerSpace.setPixelValue(0, i, 255); //make colour bottom row to be cleaned up
-                                }
-                           }*/
                         if(checkBottomLine()) { // places a new block
                                 newX = 1; //reset xy
                                 newY = 0;
                         }
                         else{
-                                if((moveBlock(X, Y, newX, newY)) == false) {
+                                if((moveBlock(X, Y, newX, newY, blockCounter)) == false) {
                                         canMove = checkEndGame();
-                                        if(!(canMove)) { // Stop trying to place
+                                        if(!(canMove)) { // Stop when game is done
                                                 break;
                                         }
-                                }
-                                else{
-                                        checkBottomLine();
                                 }
                         }
                 }
         }
 
-        uBit.display.clear(); //whipe display
+        uBit.display.clear();
 
 
         // If main exits, there may still be other fibers running or
