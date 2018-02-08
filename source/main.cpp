@@ -9,8 +9,8 @@
 MicroBit uBit;
 
 MicroBitImage stage("0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n 0, 0, 0, 0, 0\n "); // Representation of the players stage
-MicroBitImage playerSpace(stage);
-bool MoveLeft, MoveRight, canMove, canRotate = false; // Flags used in movement controll
+MicroBitImage playerSpace(stage); // Copy of stage so could be reset if chosen to
+bool moveLeft, moveRight, canMove, canRotate = false; // Flags used in movement controll
 int X, Y = 0; // Coordinates used for block movement
 int newX = 1;
 int newY = 0;
@@ -19,13 +19,13 @@ int newY = 0;
 void onButtonA(MicroBitEvent e)
 {
         if (e.value == MICROBIT_BUTTON_EVT_CLICK)
-                MoveLeft = true;
+                moveLeft = true;
         // Move left
 }
 
 void onButtonB(MicroBitEvent e)
 {
-        MoveRight = true;
+        moveRight = true;
         // Move right
 }
 
@@ -83,7 +83,6 @@ bool moveBlock(int X, int Y, int newX, int newY, int blockCounter){
                                 bRight = true;
                                 tRight = true;
                                 tLeft = true;
-                                blockCounter = -1;
                         }
                 }
 
@@ -184,17 +183,17 @@ int main()
                         uBit.sleep(1000);
                         if(canRotate) {
                                 rotateBlock(newX,newY);
-                                MoveLeft = false;
-                                MoveRight = false;
+                                moveLeft = false;
+                                moveRight = false;
                                 newY--;
                         }
-                        else if(MoveLeft == true) {
+                        else if(moveLeft == true) {
                                 newX--;
-                                MoveLeft = false;
+                                moveLeft = false;
                         }
-                        else if(MoveRight == true) {
+                        else if(moveRight == true) {
                                 newX++;
-                                MoveRight = false;
+                                moveRight = false;
                         }
                         if(checkBottomLine()) { // places a new block
                                 newX = 1; //reset xy
