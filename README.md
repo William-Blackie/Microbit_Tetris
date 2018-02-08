@@ -4,7 +4,7 @@ a basic implementation of Tetris: the aim of the game is to sort falling blocks 
 
 ## Getting Started
 
-Clone the repository and then build the
+Clone the repository.
 
 ### Prerequisites
 
