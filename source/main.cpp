@@ -35,7 +35,7 @@ void onAccellerometer(MicroBitEvent e){
         }
 }
 
-int pixelIntensity(bool pixel){
+int getPixelIntensity(bool pixel){
         if(pixel == true) {
                 return 255; // Max pixel intensity
         }
@@ -86,10 +86,10 @@ bool moveBlock(int X, int Y, int newX, int newY, int blockCounter){
                         }
                 }
 
-                playerSpace.setPixelValue(newX, newY, pixelIntensity(bLeft)); // Move all the coloured pixel
-                playerSpace.setPixelValue(newX+1, newY, pixelIntensity(bRight));
-                playerSpace.setPixelValue(newX, newY-1, pixelIntensity(tLeft));
-                playerSpace.setPixelValue(newX+1, newY-1, pixelIntensity(tRight));
+                playerSpace.setPixelValue(newX, newY, getPixelIntensity(bLeft)); // Move all the coloured pixel
+                playerSpace.setPixelValue(newX+1, newY, getPixelIntensity(bRight));
+                playerSpace.setPixelValue(newX, newY-1, getPixelIntensity(tLeft));
+                playerSpace.setPixelValue(newX+1, newY-1, getPixelIntensity(tRight));
 
                 playerSpace.setPixelValue(newX+2, newY-1, 0); // Remove old pixels
                 playerSpace.setPixelValue(newX+2, newY-2, 0);
@@ -115,10 +115,10 @@ void rotateBlock(int X, int Y){
         tLeft = (playerSpace.getPixelValue(X, Y-1) > 1);
         tRight = (playerSpace.getPixelValue(X+1,Y-1) > 1);
 
-        playerSpace.setPixelValue(X, Y, pixelIntensity(bRight)); // Rotate pixels clockwise
-        playerSpace.setPixelValue(X+1, Y, pixelIntensity(tRight));
-        playerSpace.setPixelValue(X, Y-1, pixelIntensity(bLeft));
-        playerSpace.setPixelValue(X+1, Y-1, pixelIntensity(tLeft));
+        playerSpace.setPixelValue(X, Y, getPixelIntensity(bRight)); // Rotate pixels clockwise
+        playerSpace.setPixelValue(X+1, Y, getPixelIntensity(tRight));
+        playerSpace.setPixelValue(X, Y-1, getPixelIntensity(bLeft));
+        playerSpace.setPixelValue(X+1, Y-1, getPixelIntensity(tLeft));
 
         uBit.display.print(playerSpace);
         canRotate = false;
