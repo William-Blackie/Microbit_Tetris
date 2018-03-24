@@ -10,7 +10,7 @@ Clone the repository.
 
 You will need a command line tool called yotta: https://github.com/ARMmbed/yotta follow the instalation instructions and then open the repository you cloned.
 
-## Instatlation
+## Instalation
 
 ```
 yt target bbc-microbit-classic-gcc
@@ -36,5 +36,8 @@ Shake Microbit(accelerometer): roates block clockwise one quater turn.
 ## Authors
 
 * **William Blackie**
+
+### License
+[MIT](LICENSE)
 
 
